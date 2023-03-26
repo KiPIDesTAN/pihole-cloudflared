@@ -1,0 +1,46 @@
+version: "3"
+
+# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+services:
+  cloudflared:
+    container_name: cloudflared
+    image: cloudflare/cloudflared
+    command: proxy-dns
+    # Restart on crashes and reboots
+    restart: unless-stopped
+    ports:
+      - "5053:5053/udp"
+      # Metrics reporting
+      #- "49312:49312/tcp"
+    environment:
+      TUNNEL_DNS_UPSTREAM: 'https://1.1.1.1/dns-query,https://1.0.0.1/dns-query,https://9.9.9.9/dns-query,https://149.112.112.9/dns-query'
+      # TUNNEL_DNS_UPSTREAM: 'https://9.9.9.9/dns-query,https://149.112.112.9/dns-query'
+      # Listen on unprivileged port
+      TUNNEL_DNS_PORT: '5053'
+      # Listen on all interfaces
+      TUNNEL_DNS_ADDRESS: '0.0.0.0'
+      TZ: 'America/Toronto'
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    restart: unless-stopped
+    # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
+    # These ports were commented out when networks were setup and priv_lan was set
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      #- "67:67/udp" # Only required if you are using Pi-hole as your DHCP server
+      - "80:80/tcp"
+    environment:
+      TZ: 'America/Toronto'
+      WEBPASSWORD: '<web_password_here>'
+      PIHOLE_DNS_: '127.0.0.1#5053'
+    # Volumes store your data between container upgrades
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    #cap_add:
+    #  - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+    depends_on:
+      - cloudflared
