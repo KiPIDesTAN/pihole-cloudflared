@@ -10,7 +10,7 @@ services:
     restart: unless-stopped
     ports:
       - "5053:5053/udp"
-      # Metrics reporting
+      # Metrics reporting for Prometheus. Make sure to uncomment the TUNNEL_METRICS value as well.
       #- "49312:49312/tcp"
     environment:
       TUNNEL_DNS_UPSTREAM: 'https://1.1.1.1/dns-query,https://1.0.0.1/dns-query,https://9.9.9.9/dns-query,https://149.112.112.9/dns-query'
@@ -19,6 +19,9 @@ services:
       TUNNEL_DNS_PORT: '5053'
       # Listen on all interfaces
       TUNNEL_DNS_ADDRESS: '0.0.0.0'
+      # Metrics reporting port on 49312. curl http://0.0.0.0:49312/metrics.
+      # Make sure to uncomment the port in the ports section above as well.
+      # TUNNEL_METRICS: '0.0.0.0:49312'
       TZ: 'America/Toronto'
   pihole:
     container_name: pihole
