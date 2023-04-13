@@ -40,8 +40,22 @@ services:
       PIHOLE_DNS_: '127.0.0.1#5053'
     # Volumes store your data between container upgrades
     volumes:
-      - './etc-pihole:/etc/pihole'
-      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+      # Docker Volumes
+      # Uncomment the bottom two lines to leverage Docker volumes for data persistence.
+      # Docker volumes are not compatible with the gravity sync tool.
+      #- './etc-pihole:/etc/pihole'
+      #- './etc-dnsmasq.d:/etc/dnsmasq.d'
+      # End Docker Volumes section
+      # Docker Bind Definitions
+      # The gravity sync tool requires Docker bind volumes as opposed to Docker volumes.
+      # Use these if you have multiple Pi-Holes and want to use Gravity Sync to keep Pi-Holes in sync.
+      - type: bind
+        source: <host_full_path>/etc-pihole
+        target: /etc/pihole
+      - type: bind
+        source: <host_full_path>/etc-dnsmasq.d
+        target: /etc/dnsmasq.d
+      # End Docker Bind Definitions
     #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
     #cap_add:
     #  - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
