@@ -23,6 +23,9 @@ services:
       # Make sure to uncomment the port in the ports section above as well.
       # TUNNEL_METRICS: '0.0.0.0:49312'
       TZ: 'America/Toronto'
+    networks:
+      internal:
+        ipv4_address: 172.20.0.2
   pihole:
     container_name: pihole
     image: pihole/pihole:latest
@@ -37,7 +40,7 @@ services:
     environment:
       TZ: 'America/Toronto'
       WEBPASSWORD: '<web_password_here>'
-      PIHOLE_DNS_: '127.0.0.1#5053'
+      PIHOLE_DNS_: '172.20.0.2#5053'
     # Volumes store your data between container upgrades
     volumes:
       # Docker Volumes
@@ -59,5 +62,16 @@ services:
     #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
     #cap_add:
     #  - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+    networks:
+      internal:
+        ipv4_address: 172.20.0.3
     depends_on:
       - cloudflared
+
+networks:
+  internal:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.20.0.0/24"
+
